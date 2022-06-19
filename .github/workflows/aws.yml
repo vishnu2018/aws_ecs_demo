@@ -32,6 +32,39 @@ on:
 name: Deploy to Amazon ECS
 
 jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint
+        pip install Flask
+    - name: Analysing the code with pylint
+      run: |
+        pylint $(git ls-files '*.py')
+
+    # - name: CodeGuru Reviewer
+    #   uses: aws-actions/codeguru-reviewer@v1.1
+    #   with:
+    #     build_path: target # build artifact(s) directory
+    #     s3_bucket: codeguru-reviewer-myactions-bucket # S3 Bucket with "codeguru-reviewer-*" prefix
+
+    # - name: Upload review result
+    #   if: ${{ github.event_name != 'push' }}
+    #   uses: github/codeql-action/upload-sarif@v1
+    #   with:
+    #     sarif_file: codeguru-results.sarif.json
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -51,18 +84,6 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_DEFAULT_REGION }}
-
-    - name: CodeGuru Reviewer
-      uses: aws-actions/codeguru-reviewer@v1.1
-      with:
-        build_path: target # build artifact(s) directory
-        s3_bucket: codeguru-reviewer-myactions-bucket # S3 Bucket with "codeguru-reviewer-*" prefix
-
-    - name: Upload review result
-      if: ${{ github.event_name != 'push' }}
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: codeguru-results.sarif.json
 
     - name: Login to Amazon ECR
       id: login-ecr
