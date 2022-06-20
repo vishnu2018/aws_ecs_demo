@@ -10,7 +10,7 @@ WORKDIR /app
 ENV PATH="/app/.local/bin:${PATH}"
 
 RUN chown -R vishnu:vishnu /app
-USER alex
+USER vishnu
 
 # set app config option
 ENV FLASK_ENV=production
