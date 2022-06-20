@@ -10,7 +10,7 @@ def hello_world() -> str:
     '''
     cicd demo
     '''
-    return 'Hello world! How are you?'
+    return 'Hello world! CI/CD demo successful'
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
